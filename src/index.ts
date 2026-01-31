@@ -3,13 +3,20 @@
  *
  * OpenClaw skill for playing Hyperscape MMORPG.
  * Provides tools for connecting to game server, movement, combat, skills, and more.
+ * 
+ * Features:
+ * - 32+ tools for manual gameplay
+ * - Autonomous agent mode with goals, guardrails, and THINKING+ACTION loop
+ * - Telegram logging for observability
  */
 
 export { HyperscapeClient } from "./client.js";
 export * from "./types.js";
+export * from "./autonomy/index.js";
 
-// Singleton client instance for the skill
+// Singleton instances
 let client: import("./client.js").HyperscapeClient | null = null;
+let autonomousAgent: import("./autonomy/agent.js").AutonomousAgent | null = null;
 
 /**
  * Get the current Hyperscape client instance (may be null if not connected)
@@ -419,6 +426,144 @@ export const tools = {
       return { success: true, message: `Following ${params.playerId}` };
     },
   },
+
+  // === Autonomous Agent ===
+  hyperscape_auto_start: {
+    description: "Start autonomous agent mode. The agent will play the game independently using goals, guardrails, and THINKING+ACTION loop. Logs to Telegram topic if configured.",
+    parameters: {
+      serverUrl: { type: "string", description: "WebSocket URL (optional)" },
+      authToken: { type: "string", description: "Auth token (optional)" },
+      telegramChatId: { type: "string", description: "Telegram chat ID for logging" },
+      telegramTopicId: { type: "number", description: "Telegram topic ID for logging" },
+      tickInterval: { type: "number", description: "Decision interval in ms (default 10000)" },
+      maxDuration: { type: "number", description: "Max session duration in minutes (default 60)" },
+      verbose: { type: "boolean", description: "Enable verbose logging" },
+    },
+    handler: async (params: {
+      serverUrl?: string;
+      authToken?: string;
+      telegramChatId?: string;
+      telegramTopicId?: number;
+      tickInterval?: number;
+      maxDuration?: number;
+      verbose?: boolean;
+    }) => {
+      // Lazy import to avoid circular deps
+      const { HyperscapeClient } = await import("./client.js");
+      const { createAutonomousAgent } = await import("./autonomy/agent.js");
+
+      // Create client if needed
+      if (!client) {
+        client = new HyperscapeClient({
+          serverUrl: params.serverUrl,
+          authToken: params.authToken,
+        });
+        await client.connect();
+        await client.enterWorld();
+        client.clientReady();
+      }
+
+      // Create autonomous agent
+      autonomousAgent = createAutonomousAgent(client, {
+        telegramChatId: params.telegramChatId,
+        telegramTopicId: params.telegramTopicId,
+        tickInterval: params.tickInterval ?? 10000,
+        maxSessionDuration: (params.maxDuration ?? 60) * 60000,
+        verbose: params.verbose ?? false,
+      });
+
+      // Start the agent
+      await autonomousAgent.start();
+
+      return {
+        success: true,
+        message: "Autonomous agent started",
+        config: {
+          tickInterval: params.tickInterval ?? 10000,
+          maxDuration: params.maxDuration ?? 60,
+          logging: params.telegramChatId ? `Telegram ${params.telegramChatId}` : "console only",
+        },
+      };
+    },
+  },
+
+  hyperscape_auto_stop: {
+    description: "Stop the autonomous agent and return to manual control",
+    parameters: {},
+    handler: async () => {
+      if (!autonomousAgent) {
+        return { success: false, message: "No autonomous agent running" };
+      }
+
+      await autonomousAgent.stop();
+      const stats = autonomousAgent.getStats();
+      autonomousAgent = null;
+
+      return {
+        success: true,
+        message: "Autonomous agent stopped",
+        stats: {
+          duration: Math.floor((Date.now() - stats.sessionStart) / 60000),
+          goalsCompleted: stats.goalsCompleted,
+          mobsKilled: stats.mobsKilled,
+          resourcesGathered: stats.resourcesGathered,
+          totalXp: Object.values(stats.xpGained).reduce((a, b) => a + b, 0),
+          deaths: stats.deaths,
+        },
+      };
+    },
+  },
+
+  hyperscape_auto_status: {
+    description: "Get current autonomous agent status, stats, and recent thoughts",
+    parameters: {
+      thoughtCount: { type: "number", description: "Number of recent thoughts to return (default 5)" },
+    },
+    handler: async (params: { thoughtCount?: number }) => {
+      if (!autonomousAgent) {
+        return { 
+          success: true, 
+          running: false, 
+          message: "No autonomous agent running" 
+        };
+      }
+
+      const stats = autonomousAgent.getStats();
+      const thoughts = autonomousAgent.getThoughts(params.thoughtCount ?? 5);
+
+      return {
+        success: true,
+        running: autonomousAgent.isRunning(),
+        stats: {
+          duration: Math.floor((Date.now() - stats.sessionStart) / 60000),
+          tickCount: stats.tickCount,
+          goalsCompleted: stats.goalsCompleted,
+          mobsKilled: stats.mobsKilled,
+          resourcesGathered: stats.resourcesGathered,
+          totalXp: Object.values(stats.xpGained).reduce((a, b) => a + b, 0),
+          deaths: stats.deaths,
+        },
+        recentThoughts: thoughts.map(t => ({
+          time: new Date(t.timestamp).toISOString(),
+          goal: t.goal,
+          thinking: t.thinking,
+          action: t.action,
+          warnings: t.warnings,
+        })),
+      };
+    },
+  },
+
+  hyperscape_auto_set_logger: {
+    description: "Set a custom logging function for the autonomous agent (advanced)",
+    parameters: {},
+    handler: async () => {
+      return {
+        success: false,
+        message: "Use the telegramChatId/telegramTopicId params in hyperscape_auto_start instead",
+      };
+    },
+  },
 };
 
 // Provider for context injection
@@ -444,11 +589,24 @@ export const providers = {
       return client.getBankContext();
     },
   },
+  autonomousStatus: {
+    description: "Status of autonomous agent (if running)",
+    get: () => {
+      if (!autonomousAgent) return { running: false };
+      const stats = autonomousAgent.getStats();
+      return {
+        running: autonomousAgent.isRunning(),
+        duration: Math.floor((Date.now() - stats.sessionStart) / 60000),
+        goalsCompleted: stats.goalsCompleted,
+        recentThoughts: autonomousAgent.getThoughts(3),
+      };
+    },
+  },
 };
 
 export default {
   name: "hyperscape",
-  description: "Play Hyperscape MMORPG as an AI agent. Connect to game servers, move around, fight mobs, gather resources, manage inventory, trade with NPCs, and more.",
+  description: "Play Hyperscape MMORPG as an AI agent. Connect to game servers, move around, fight mobs, gather resources, manage inventory, trade with NPCs, and more. Supports autonomous mode with goal-based AI.",
   tools,
   providers,
 };

@@ -6,22 +6,25 @@ Enable Clawdbot/OpenClaw agents to play Hyperscape by connecting directly to the
 ## Architecture
 
 ```
-┌─────────────────┐
-│  Clawdbot Agent │
-│    (Claude)     │
-└────────┬────────┘
-         │ tools + providers
+┌─────────────────────────────────────────┐
+│ OpenClaw Session (main)                 │
+│  └─ hyperscape_auto_start               │
+└─────────────────────────────────────────┘
+         │
          ▼
-┌─────────────────┐
-│ hyperscape-skill│
-│  (this package) │
-└────────┬────────┘
+┌─────────────────────────────────────────┐
+│ AutonomousAgent                         │
+│  ├─ GoalTemplates (what to do)          │
+│  ├─ Guardrails (safety rules)           │
+│  ├─ THINKING+ACTION loop                │
+│  ├─ HyperscapeClient (game connection)  │
+│  └─ Logger → Telegram topic             │
+└─────────────────────────────────────────┘
          │ WebSocket + MessagePack
          ▼
-┌─────────────────┐
-│Hyperscape Server│
-│  (port 5555)    │
-└─────────────────┘
+┌─────────────────────────────────────────┐
+│ Hyperscape Server (port 5555)           │
+└─────────────────────────────────────────┘
 ```
 
 ## Implementation Progress
@@ -72,7 +75,27 @@ Enable Clawdbot/OpenClaw agents to play Hyperscape by connecting directly to the
 - [x] Available actions provider
 - [x] Death/respawn handling
 
-### Phase 5: Advanced Features (TODO)
+### Phase 5: Autonomous Agent Mode ✅ COMPLETE
+- [x] Goal templates system (8 goals)
+  - flee_danger, eat_food, respawn (survival)
+  - train_combat (combat)
+  - gather_resources, collect_loot (gathering)
+  - explore_area, bank_items (exploration/management)
+- [x] Guardrails system (9 rules)
+  - no_combat_low_hp, flee_threshold (survival)
+  - no_drop_valuables, no_sell_valuables (item protection)
+  - no_attack_high_level, no_multi_combat (combat safety)
+  - inventory_full_warning (resource management)
+  - respect_dialogue, respect_bank, respect_store (UI state)
+- [x] THINKING+ACTION decision loop
+- [x] `hyperscape_auto_start` tool
+- [x] `hyperscape_auto_stop` tool
+- [x] `hyperscape_auto_status` tool
+- [x] Session stats tracking (XP, kills, resources, deaths)
+- [x] Goal context with diversity scoring
+- [ ] Telegram topic logging integration
+
+### Phase 6: Advanced Features (TODO)
 - [ ] Quest system tools (getQuestList, acceptQuest, etc.)
 - [ ] Player trading tools
 - [ ] Dueling system
@@ -92,11 +115,16 @@ packages/skill-hyperscape/
 ├── src/
 │   ├── index.ts          # Skill entry point, all tools
 │   ├── client.ts         # WebSocket client
-│   └── types.ts          # Shared types, packet definitions
+│   ├── types.ts          # Shared types, packet definitions
+│   └── autonomy/         # Autonomous agent system
+│       ├── index.ts      # Module exports
+│       ├── goals.ts      # Goal templates
+│       ├── guardrails.ts # Safety rules
+│       └── agent.ts      # AutonomousAgent class
 └── dist/                 # Compiled output
 ```
 
-## Tools Summary (32 total)
+## Tools Summary (36 total)
 
 ### Connection (3)
 - hyperscape_connect
@@ -146,10 +174,17 @@ packages/skill-hyperscape/
 - hyperscape_chat
 - hyperscape_follow
 
-## Providers (3)
+### Autonomous Agent (4)
+- hyperscape_auto_start
+- hyperscape_auto_stop
+- hyperscape_auto_status
+- hyperscape_auto_set_logger
+
+## Providers (4)
 - gameState - Position, health, skills, inventory
 - availableActions - Context-aware action list
 - bankState - Bank contents when open
+- autonomousStatus - Agent running state, stats, thoughts
 
 ## Dependencies
 
@@ -167,12 +202,14 @@ packages/skill-hyperscape/
 1. **Build test**: `npm run build` compiles without errors
 2. **Connection test**: Connect to local hyperscape server
 3. **Integration tests**: Full gameplay loops
-4. **E2E with agent**: Test with actual Clawdbot instance
+4. **Autonomous test**: Let agent run for 10+ minutes
+5. **E2E with agent**: Test with actual Clawdbot instance
 
 ## Next Steps
 
-1. Publish to npm as @clawdbot/skill-hyperscape
-2. Test with running Hyperscape server
-3. Add quest system tools
-4. Add player trading
-5. Create example agent workflows
+1. Wire up Telegram logging in autonomous agent
+2. Publish to npm as @clawdbot/skill-hyperscape
+3. Test with running Hyperscape server
+4. Add quest system tools
+5. Add player trading
+6. Create example agent workflows
