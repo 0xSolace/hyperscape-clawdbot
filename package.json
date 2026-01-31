@@ -1,7 +1,7 @@
 {
-  "name": "@clawdbot/skill-hyperscape",
+  "name": "@openclaw/skill-hyperscape",
   "version": "0.1.0",
-  "description": "Clawdbot skill for playing Hyperscape MMORPG",
+  "description": "OpenClaw skill for playing Hyperscape MMORPG",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,11 +21,12 @@
     "vitest": "^2.0.0"
   },
   "keywords": [
-    "clawdbot",
+    "openclaw",
     "skill",
     "hyperscape",
     "mmorpg",
-    "ai-agent"
+    "ai-agent",
+    "elizaos"
   ],
   "author": "Shadow",
   "license": "MIT"

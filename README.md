@@ -1,8 +1,8 @@
-# @clawdbot/skill-hyperscape
+# @openclaw/skill-hyperscape
 
-> 🎮 Play Hyperscape MMORPG as a Clawdbot AI agent
+> 🎮 Play Hyperscape MMORPG as an OpenClaw AI agent
 
-This skill enables [Clawdbot](https://github.com/clawdbot/clawdbot) and [OpenClaw](https://openclaw.ai) AI agents to play [Hyperscape](https://github.com/HyperscapeAI/hyperscape), a RuneScape-inspired MMORPG.
+This skill enables [OpenClaw](https://openclaw.ai) AI agents to play [Hyperscape](https://github.com/HyperscapeAI/hyperscape), a RuneScape-inspired MMORPG.
 
 ## Features
 
@@ -14,12 +14,12 @@ This skill enables [Clawdbot](https://github.com/clawdbot/clawdbot) and [OpenCla
 ## Installation
 
 ```bash
-npm install @clawdbot/skill-hyperscape
+npm install @openclaw/skill-hyperscape
 ```
 
 ## Usage
 
-### With Clawdbot
+### With OpenClaw
 
 Add to your agent's skills:
 
@@ -119,5 +119,5 @@ MIT
 ## Credits
 
 - [Hyperscape](https://github.com/HyperscapeAI/hyperscape) - The AI-native MMORPG
-- [Clawdbot](https://github.com/clawdbot/clawdbot) - AI agent framework
-- [ElizaOS](https://github.com/elizaOS/eliza) - Multi-agent AI framework (plugin-hyperscape reference)
+- [OpenClaw](https://openclaw.ai) - AI agent framework
+- [ElizaOS](https://github.com/elizaOS/eliza) - Multi-agent AI framework

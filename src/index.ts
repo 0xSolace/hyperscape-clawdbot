@@ -1,7 +1,7 @@
 /**
- * @clawdbot/skill-hyperscape
+ * @openclaw/skill-hyperscape
  *
- * Clawdbot skill for playing Hyperscape MMORPG.
+ * OpenClaw skill for playing Hyperscape MMORPG.
  * Provides tools for connecting to game server, movement, combat, skills, and more.
  */
 

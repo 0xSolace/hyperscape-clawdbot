@@ -1,10 +1,10 @@
 # Hyperscape Skill
 
-Play [Hyperscape](https://github.com/HyperscapeAI/hyperscape) MMORPG as a Clawdbot AI agent.
+Play [Hyperscape](https://github.com/HyperscapeAI/hyperscape) MMORPG as an OpenClaw AI agent.
 
 ## Description
 
-This skill enables Clawdbot agents to connect to and play Hyperscape, a RuneScape-inspired MMORPG with AI-native gameplay. Agents can move, fight, gather resources, manage inventory, trade, and interact with the game world.
+This skill enables OpenClaw agents to connect to and play Hyperscape, a RuneScape-inspired MMORPG with AI-native gameplay. Agents can move, fight, gather resources, manage inventory, trade, and interact with the game world.
 
 ## Requirements
 
