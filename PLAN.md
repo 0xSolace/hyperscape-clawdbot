@@ -24,102 +24,132 @@ Enable Clawdbot/OpenClaw agents to play Hyperscape by connecting directly to the
 └─────────────────┘
 ```
 
-## Components
+## Implementation Progress
 
-### 1. HyperscapeClient (core connection)
-- WebSocket connection to game server
-- MessagePack serialization/deserialization  
-- Authentication via Privy token
-- Reconnection handling
-- Event emitter for game state updates
+### Phase 1: Core Connection ✅ COMPLETE
+- [x] WebSocket client with MessagePack
+- [x] Authentication flow (Privy token)
+- [x] Basic state tracking (position, health)
+- [x] `hyperscape_connect` tool
+- [x] `hyperscape_status` tool
+- [x] `hyperscape_move` tool
+- [x] Packet list synced with server (200+ packets)
 
-### 2. Game State Manager
-- Track player state (position, health, inventory, skills)
-- Track nearby entities (NPCs, players, items)
-- Track available actions based on context
+### Phase 2: Combat & Skills ✅ COMPLETE
+- [x] `hyperscape_attack` tool (melee/ranged/magic)
+- [x] `hyperscape_gather` tool (trees, rocks, fishing)
+- [x] `hyperscape_cook` tool
+- [x] `hyperscape_light_fire` tool
+- [x] Combat state tracking (target, style, auto-retaliate)
+- [x] Skill XP tracking via skillsUpdated/xpDrop packets
+- [x] `hyperscape_change_attack_style` tool
+- [x] `hyperscape_auto_retaliate` tool
 
-### 3. Clawdbot Tools (actions)
-| Tool | Description |
-|------|-------------|
-| `hyperscape_connect` | Connect to game server |
-| `hyperscape_move` | Move to position or entity |
-| `hyperscape_attack` | Attack target entity |
-| `hyperscape_chop` | Chop nearby tree |
-| `hyperscape_fish` | Fish at nearby spot |
-| `hyperscape_cook` | Cook food on fire |
-| `hyperscape_pickup` | Pick up ground item |
-| `hyperscape_drop` | Drop inventory item |
-| `hyperscape_equip` | Equip item |
-| `hyperscape_bank` | Deposit/withdraw from bank |
-| `hyperscape_chat` | Send chat message |
-| `hyperscape_status` | Get current game state |
+### Phase 3: Inventory & Banking ✅ COMPLETE
+- [x] `hyperscape_pickup` tool
+- [x] `hyperscape_drop` tool
+- [x] `hyperscape_equip` tool
+- [x] `hyperscape_unequip` tool
+- [x] `hyperscape_use_item` tool
+- [x] `hyperscape_bank_deposit` tool
+- [x] `hyperscape_bank_withdraw` tool
+- [x] `hyperscape_bank_deposit_all` tool
+- [x] `hyperscape_bank_close` tool
+- [x] Inventory state provider
+- [x] Bank state provider
 
-### 4. Clawdbot Providers (context)
-| Provider | Description |
-|----------|-------------|
-| `gameState` | Current player stats, position |
-| `inventory` | Items in inventory |
-| `nearbyEntities` | NPCs, players, items nearby |
-| `availableActions` | Context-aware action list |
+### Phase 4: NPC & Social ✅ COMPLETE
+- [x] `hyperscape_npc_interact` tool
+- [x] `hyperscape_dialogue_respond` tool
+- [x] `hyperscape_dialogue_continue` tool
+- [x] `hyperscape_dialogue_close` tool
+- [x] `hyperscape_store_buy` tool
+- [x] `hyperscape_store_sell` tool
+- [x] `hyperscape_store_close` tool
+- [x] `hyperscape_chat` tool
+- [x] `hyperscape_follow` tool
+- [x] Nearby entities provider
+- [x] Available actions provider
+- [x] Death/respawn handling
+
+### Phase 5: Advanced Features (TODO)
+- [ ] Quest system tools (getQuestList, acceptQuest, etc.)
+- [ ] Player trading tools
+- [ ] Dueling system
+- [ ] Prayer/spell system
+- [ ] Friends list / private messages
+- [ ] Smelting/smithing tools
 
 ## File Structure
 
 ```
 packages/skill-hyperscape/
 ├── SKILL.md              # Clawdbot skill manifest
+├── PLAN.md               # This file
+├── README.md             # User documentation
 ├── package.json
 ├── tsconfig.json
 ├── src/
-│   ├── index.ts          # Skill entry point
+│   ├── index.ts          # Skill entry point, all tools
 │   ├── client.ts         # WebSocket client
-│   ├── state.ts          # Game state manager
-│   ├── tools/
-│   │   ├── connect.ts
-│   │   ├── movement.ts
-│   │   ├── combat.ts
-│   │   ├── skills.ts
-│   │   ├── inventory.ts
-│   │   ├── social.ts
-│   │   └── index.ts
-│   ├── providers/
-│   │   ├── gameState.ts
-│   │   ├── inventory.ts
-│   │   ├── nearbyEntities.ts
-│   │   └── index.ts
-│   └── types.ts          # Shared types (from hyperscape)
-└── README.md
+│   └── types.ts          # Shared types, packet definitions
+└── dist/                 # Compiled output
 ```
 
-## Implementation Phases
+## Tools Summary (32 total)
 
-### Phase 1: Core Connection (MVP)
-- [ ] WebSocket client with MessagePack
-- [ ] Authentication flow
-- [ ] Basic state tracking (position, health)
-- [ ] `hyperscape_connect` tool
-- [ ] `hyperscape_status` tool
-- [ ] `hyperscape_move` tool
+### Connection (3)
+- hyperscape_connect
+- hyperscape_disconnect
+- hyperscape_status
 
-### Phase 2: Combat & Skills
-- [ ] `hyperscape_attack` tool
-- [ ] `hyperscape_chop` tool
-- [ ] `hyperscape_fish` tool
-- [ ] Combat state tracking
-- [ ] Skill XP tracking
+### Movement (2)
+- hyperscape_move
+- hyperscape_home_teleport
 
-### Phase 3: Inventory & Banking
-- [ ] `hyperscape_pickup` tool
-- [ ] `hyperscape_drop` tool
-- [ ] `hyperscape_equip` tool
-- [ ] `hyperscape_bank` tool
-- [ ] Inventory state provider
+### Combat (4)
+- hyperscape_attack
+- hyperscape_change_attack_style
+- hyperscape_auto_retaliate
+- hyperscape_respawn
 
-### Phase 4: Social & Polish
-- [ ] `hyperscape_chat` tool
-- [ ] Nearby entities provider
-- [ ] Available actions provider
-- [ ] Error handling improvements
-- [ ] Reconnection logic
+### Gathering (3)
+- hyperscape_gather
+- hyperscape_cook
+- hyperscape_light_fire
+
+### Inventory (5)
+- hyperscape_pickup
+- hyperscape_drop
+- hyperscape_equip
+- hyperscape_unequip
+- hyperscape_use_item
+
+### Banking (4)
+- hyperscape_bank_deposit
+- hyperscape_bank_deposit_all
+- hyperscape_bank_withdraw
+- hyperscape_bank_close
+
+### NPCs & Dialogue (4)
+- hyperscape_npc_interact
+- hyperscape_dialogue_respond
+- hyperscape_dialogue_continue
+- hyperscape_dialogue_close
+
+### Store (3)
+- hyperscape_store_buy
+- hyperscape_store_sell
+- hyperscape_store_close
+
+### Social (2)
+- hyperscape_chat
+- hyperscape_follow
+
+## Providers (3)
+- gameState - Position, health, skills, inventory
+- availableActions - Context-aware action list
+- bankState - Bank contents when open
 
 ## Dependencies
 
@@ -127,45 +157,22 @@ packages/skill-hyperscape/
 {
   "dependencies": {
     "ws": "^8.18.0",
-    "@msgpack/msgpack": "^3.0.0"
+    "msgpackr": "^1.11.0"
   }
 }
 ```
 
-## Message Protocol
-
-Hyperscape uses MessagePack over WebSocket. Key message types:
-
-**Client → Server:**
-- `auth`: `{ type: "auth", token: string }`
-- `move`: `{ type: "move", position: {x, y, z} }`
-- `attack`: `{ type: "attack", targetId: string }`
-- `action`: `{ type: "action", action: string, data: any }`
-
-**Server → Client:**
-- `state`: Full game state update
-- `entity_update`: Entity changes
-- `chat`: Chat messages
-- `error`: Error messages
-
 ## Testing Strategy
 
-1. **Unit tests**: State management, message parsing
-2. **Integration tests**: Connect to local hyperscape server
-3. **E2E tests**: Full gameplay loops (move, attack, loot)
+1. **Build test**: `npm run build` compiles without errors
+2. **Connection test**: Connect to local hyperscape server
+3. **Integration tests**: Full gameplay loops
+4. **E2E with agent**: Test with actual Clawdbot instance
 
-## Success Criteria
+## Next Steps
 
-- [ ] Clawdbot can connect and authenticate to Hyperscape
-- [ ] Agent can move around the world
-- [ ] Agent can attack NPCs
-- [ ] Agent can train skills (woodcutting, fishing)
-- [ ] Agent can manage inventory
-- [ ] Agent can respond to game state in conversation
-
-## References
-
-- Hyperscape repo: https://github.com/HyperscapeAI/hyperscape
-- plugin-hyperscape: `/packages/plugin-hyperscape/`
-- ElizaOS types: `@elizaos/core`
-- Clawdbot skills: https://docs.clawd.bot/skills
+1. Publish to npm as @clawdbot/skill-hyperscape
+2. Test with running Hyperscape server
+3. Add quest system tools
+4. Add player trading
+5. Create example agent workflows

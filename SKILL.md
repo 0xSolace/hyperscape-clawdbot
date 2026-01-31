@@ -1,62 +1,134 @@
----
-name: hyperscape
-description: Play Hyperscape MMORPG as an AI agent. Connect to game server, move around, fight, gather resources, and interact with the world.
----
-
 # Hyperscape Skill
 
-Enables Clawdbot agents to play Hyperscape, a RuneScape-inspired MMORPG.
+Play [Hyperscape](https://github.com/HyperscapeAI/hyperscape) MMORPG as a Clawdbot AI agent.
 
-## Setup
+## Description
 
-1. Have a Hyperscape server running (default: ws://localhost:5555/ws)
-2. Get auth credentials (Privy token or guest mode)
-3. Configure connection in environment or via tool
+This skill enables Clawdbot agents to connect to and play Hyperscape, a RuneScape-inspired MMORPG with AI-native gameplay. Agents can move, fight, gather resources, manage inventory, trade, and interact with the game world.
+
+## Requirements
+
+- Hyperscape server running (default: `ws://localhost:5555/ws`)
+- Optional: Privy auth token for authenticated connections
+
+## Environment Variables
+
+- `HYPERSCAPE_SERVER_URL` - WebSocket URL (default: `ws://localhost:5555/ws`)
+- `HYPERSCAPE_AUTH_TOKEN` - Privy auth token for authentication
 
 ## Tools
 
 ### Connection
-- `hyperscape_connect` - Connect to game server
-- `hyperscape_disconnect` - Disconnect from server
-- `hyperscape_status` - Get connection and game state
+| Tool | Description |
+|------|-------------|
+| `hyperscape_connect` | Connect to game server and enter world |
+| `hyperscape_disconnect` | Disconnect from server |
+| `hyperscape_status` | Get full game state, position, health, skills, inventory, nearby entities |
 
 ### Movement
-- `hyperscape_move` - Move to position or named location
-- `hyperscape_follow` - Follow another entity
+| Tool | Description |
+|------|-------------|
+| `hyperscape_move` | Move to coordinates (x, y, z) |
+| `hyperscape_home_teleport` | Teleport to spawn location |
 
 ### Combat
-- `hyperscape_attack` - Attack a target entity
-- `hyperscape_flee` - Run away from combat
+| Tool | Description |
+|------|-------------|
+| `hyperscape_attack` | Attack a mob or enemy (melee/ranged/magic) |
+| `hyperscape_change_attack_style` | Change combat attack style |
+| `hyperscape_auto_retaliate` | Toggle auto-retaliate on/off |
+| `hyperscape_respawn` | Respawn after death |
 
-### Skills
-- `hyperscape_chop` - Chop a nearby tree
-- `hyperscape_fish` - Fish at a nearby fishing spot
-- `hyperscape_cook` - Cook food on a fire
-- `hyperscape_mine` - Mine a nearby rock
+### Gathering
+| Tool | Description |
+|------|-------------|
+| `hyperscape_gather` | Gather from resource (tree, rock, fishing spot) |
+| `hyperscape_cook` | Cook food on fire/range |
+| `hyperscape_light_fire` | Light a fire with tinderbox + logs |
 
 ### Inventory
-- `hyperscape_pickup` - Pick up ground item
-- `hyperscape_drop` - Drop item from inventory
-- `hyperscape_equip` - Equip an item
-- `hyperscape_use` - Use an item
+| Tool | Description |
+|------|-------------|
+| `hyperscape_pickup` | Pick up ground item |
+| `hyperscape_drop` | Drop item from inventory |
+| `hyperscape_equip` | Equip item |
+| `hyperscape_unequip` | Unequip item to inventory |
+| `hyperscape_use_item` | Use item (eat, drink, etc) |
+
+### Banking
+| Tool | Description |
+|------|-------------|
+| `hyperscape_bank_deposit` | Deposit item to bank |
+| `hyperscape_bank_deposit_all` | Deposit all inventory items |
+| `hyperscape_bank_withdraw` | Withdraw item from bank |
+| `hyperscape_bank_close` | Close bank interface |
+
+### NPCs & Dialogue
+| Tool | Description |
+|------|-------------|
+| `hyperscape_npc_interact` | Interact with NPC (talk, trade, bank) |
+| `hyperscape_dialogue_respond` | Select dialogue option |
+| `hyperscape_dialogue_continue` | Continue dialogue |
+| `hyperscape_dialogue_close` | Close dialogue |
+
+### Store
+| Tool | Description |
+|------|-------------|
+| `hyperscape_store_buy` | Buy item from store |
+| `hyperscape_store_sell` | Sell item to store |
+| `hyperscape_store_close` | Close store |
 
 ### Social
-- `hyperscape_chat` - Send chat message
-- `hyperscape_emote` - Perform emote
+| Tool | Description |
+|------|-------------|
+| `hyperscape_chat` | Send chat message |
+| `hyperscape_follow` | Follow another player |
 
-## Environment Variables
+## Providers
 
-- `HYPERSCAPE_SERVER_URL` - WebSocket URL (default: ws://localhost:5555/ws)
-- `HYPERSCAPE_AUTH_TOKEN` - Privy auth token (optional)
+| Provider | Description |
+|----------|-------------|
+| `gameState` | Current position, health, skills, inventory |
+| `availableActions` | Context-aware list of available actions |
+| `bankState` | Bank contents (when open) |
 
-## Example Usage
+## Usage Examples
 
+### Connect and explore
 ```
-Connect to hyperscape and show my status
+Connect to hyperscape and tell me where I am
+```
 
-Move to the forest
-
+### Combat
+```
 Attack the nearest goblin
-
-Chop trees until I have 10 logs
 ```
+
+### Gathering
+```
+Find a tree and start chopping wood
+```
+
+### Banking
+```
+Go to the bank, deposit all my items, then withdraw 100 gold
+```
+
+## Protocol
+
+Uses binary WebSocket with MessagePack serialization to communicate with Hyperscape server. Packet IDs map to server methods for bandwidth efficiency.
+
+## Status
+
+- ✅ Connection & authentication
+- ✅ Movement & positioning
+- ✅ Combat & attack styles
+- ✅ Resource gathering
+- ✅ Inventory management
+- ✅ Banking
+- ✅ NPC interaction & dialogue
+- ✅ Store buying/selling
+- ✅ Chat & social
+- 🔲 Quest system
+- 🔲 Trading with players
+- 🔲 Dueling
